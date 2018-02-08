@@ -1,25 +1,17 @@
-import React, { Component } from 'react';
-import logo from './logo.svg';
-import Grid from 'react-bootstrap/lib/Grid';
-import Row from 'react-bootstrap/lib/Row';
-import Col from 'react-bootstrap/lib/Col';
-import Nav from 'react-bootstrap/lib/Nav';
-import Navbar from 'react-bootstrap/lib/Navbar';
+import React, { PureComponent } from 'react';
+import { MuiThemeProvider, createMuiTheme } from 'material-ui/styles';
+import Layout from './components/Layout';
 
 import './App.css';
 
-class App extends Component {
+const theme = createMuiTheme();
+
+class App extends PureComponent {
   render() {
     return (
-      <div>
-        <Grid className="App" style={{ backgroundColor:"red" }}>
-          <Row className="show-grid">
-            <Col xs={12} md={8} lg={8} style={{ backgroundColor:"purple" }}>
-              Rest of the code goes here
-            </Col>
-          </Row>
-        </Grid>
-      </div>
+      <MuiThemeProvider theme={theme}>
+        <Layout />
+      </MuiThemeProvider>
     );
   }
 }

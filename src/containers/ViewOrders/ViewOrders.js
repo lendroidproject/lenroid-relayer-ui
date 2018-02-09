@@ -84,7 +84,7 @@ class ViewOrders extends Component {
 
   render() {
     const { orders } = this.state;
-    const orderNodes = orders.map(function (order, index) {
+    const orderNodes = orders.map((order, index) => {
       return (
         <tr key={index}>
           <td>{getTokenNameFromAddress(order.makerTokenAddress)}</td>

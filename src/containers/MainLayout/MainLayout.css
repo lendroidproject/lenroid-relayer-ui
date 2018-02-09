@@ -1,0 +1,53 @@
+.main-layout {
+  max-width: 1256px;
+  margin: auto;
+  min-height: 800px;
+}
+
+.header {
+  padding: 12px;
+  line-height: 40px;
+  background-color: white;
+}
+
+.header .app-logo {
+  display: inline-block;
+  line-height: 40px;
+}
+
+.header .app-logo h1 {
+  margin: 0px;
+  font-size: 36px;
+}
+
+.header .user-menu {
+  float: right;
+  line-height: 40px;
+}
+
+.header .user-menu .wallet-info {
+  height: 40px;
+  display: inline-block;
+  line-height: 1;
+  padding: 0px 10px;
+  border-right: 1px solid rgb(224, 224, 224);
+}
+
+.header .user-menu .wallet-info .web3-provider {
+  font-size: 12px;
+  color: rgb(255, 143, 0);
+  margin-bottom: 5px;
+}
+
+.header .user-menu .wallet-info .web3-address{
+  font-size: 12px;
+  margin: 5px 0px;
+}
+
+.header .user-menu .menu-icon {
+  margin-left: 10px;
+}
+
+.main-layout .ant-layout-sider-trigger {
+  position: absolute;
+}

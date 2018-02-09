@@ -66,7 +66,7 @@ class ViewOrders extends Component {
   /* 
   componentDidMount() {
     const self = this;
-    axios.get('http://localhost:8080/orders?address=' + this.props.lenderAddress)
+    axios.get('http://localhost:8090/orders?address=' + this.props.lenderAddress)
       .then((response) => {
         console.log(response.data);
         this.setState({
@@ -89,16 +89,18 @@ class ViewOrders extends Component {
         <tr key={index}>
           <td>{getTokenNameFromAddress(order.makerTokenAddress)}</td>
           <td>{order.makerTokenAmount}</td>
+          <td>{order.makerFee}</td>
           <td>{getTokenNameFromAddress(order.takerTokenAddress)}</td>
           <td>{order.takerTokenAmount} {order.costToken}</td>
+          <td>{order.takerFee}</td>
           <td>
-            <Button 
+            {/* <Button 
               type="primary"
               onClick={() => this.handleTakeOrder(order)}
               size="large"
             >
               Take
-            </Button>
+            </Button> */}
           </td>
         </tr>
       );
@@ -114,8 +116,10 @@ class ViewOrders extends Component {
           <tr>
             <th>Maker Token</th>
             <th>Maker Amount</th>
+            <th>Maker Fee</th>
             <th>Taker Token</th>
             <th>Taker Amount</th>
+            <th>Taker Fee</th>
             <th></th>
           </tr>
         </thead>

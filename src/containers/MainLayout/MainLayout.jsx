@@ -36,7 +36,7 @@ class MainLayout extends PureComponent {
       <Layout className="main-layout">
         <Header className="header">
           <div className="app-logo">
-            <h1>Lendroid</h1>
+            <h1>Relayer Portal</h1>
           </div>
 
           <div className="user-menu">

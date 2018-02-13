@@ -32,6 +32,10 @@ class ViewOrders extends Component {
     console.log(order);
   }
 
+  handleCreateOrder = () => {
+
+  }
+
   render() {
     const { orders } = this.state;
     const orderNodes = orders.map(function (order, index) {
@@ -43,7 +47,6 @@ class ViewOrders extends Component {
           <td>{order.takerTokenAmount} {order.costToken}</td>
           <td>
             <Button
-              type="primary"
               onClick={() => this.handleTakeOrder(order)}
               size="large"
             >
@@ -54,25 +57,35 @@ class ViewOrders extends Component {
       );
     });
     return (
-      <Table
-        className="orders-table"
-        striped
-        hover
-        responsive
-      >
-        <thead>
-          <tr>
-            <th>Maker Token</th>
-            <th>Maker Amount</th>
-            <th>Taker Token</th>
-            <th>Taker Amount</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          {orderNodes}
-        </tbody>
-      </Table>
+      <div className="view-orders">
+        <Button 
+          type="primary"
+          size="large"
+          onClick={this.handleCreateOrder}
+          className="btn-create-order"
+        >
+          Create Order
+        </Button>
+        <Table
+          className="orders-table"
+          striped
+          hover
+          responsive
+        >
+          <thead>
+            <tr>
+              <th>Maker Token</th>
+              <th>Maker Amount</th>
+              <th>Taker Token</th>
+              <th>Taker Amount</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {orderNodes}
+          </tbody>
+        </Table>
+      </div>
     );
   }
 }

@@ -1,3 +1,10 @@
-.orders-table {
+
+
+.view-orders .orders-table {
   border: 1px solid #ddd;
+}
+
+.view-orders .btn-create-order {
+  float: right;
+  margin-bottom: 20px;
 }

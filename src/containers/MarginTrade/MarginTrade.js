@@ -107,28 +107,30 @@ class MarginTrade extends Component {
       );
     });
     return (
-      <Table
-        className="matching-orders-table"
-        striped
-        hover
-        responsive
-      >
-        <thead>
-          <tr>
-            <th>Market</th>
-            <th>Maker Token</th>
-            <th>Maker Amount</th>
-            <th>Maker Fee</th>
-            <th>Taker Token</th>
-            <th>Taker Amount</th>
-            <th>Taker Fee</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          {matchesNodes}
-        </tbody>
-      </Table>
+      <div className="margin-trade">
+        <Table
+          className="matching-orders-table"
+          striped
+          hover
+          responsive
+        >
+          <thead>
+            <tr>
+              <th>Market</th>
+              <th>Maker Token</th>
+              <th>Maker Amount</th>
+              <th>Maker Fee</th>
+              <th>Taker Token</th>
+              <th>Taker Amount</th>
+              <th>Taker Fee</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {matchesNodes}
+          </tbody>
+        </Table>
+      </div>
     );
   }
 }

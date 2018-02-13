@@ -1,133 +1,136 @@
 import React, { Component } from 'react';
-import { Col, Button, Form, FormGroup, Label, Input, FormText, Row } from 'reactstrap';
+import { Col, Table } from 'reactstrap';
+import { Button } from 'antd';
 import { default as Web3 } from 'web3';
 import axios from 'axios';
+import { getTokenNameFromAddress } from '../../utils';
+import './MarginTrade.css';
 
-const MARKETS = {
-  'OMG_ETH': { pair: 'OMG/ETH', loanToken: 'OMG' },
-  'ZRX_ETH': { pair: 'ZRX/ETH', loanToken: 'ZRX' },
-}
-class CreateOffer extends Component {
+const dummyOrders = [
+  {
+    "exchangeContractAddress": "0x12459c951127e0c374ff9105dda097662a027093",
+    "maker": "0x9e56625509c2f60af937f23b7b532600390e8c8b",
+    "taker": "0xa2b31dacf30a9c50ca473337c01d8a201ae33e32",
+    "makerTokenAddress": "0x323b5d4c32345ced77393b3530b1eed0f346429d",
+    "takerTokenAddress": "0xef7fff64389b814a946f3e92105513705ca6b990",
+    "feeRecipient": "0xb046140686d052fff581f63f8136cce132e857da",
+    "makerTokenAmount": "10000000000000000",
+    "takerTokenAmount": "20000000000000000",
+    "makerFee": "100000000000000",
+    "takerFee": "200000000000000",
+    "expirationUnixTimestampSec": "42",
+    "salt": "67006738228878699843088602623665307406148487219438534730168799356281242528500",
+    "ecSignature": "0x61a3ed31b43c8780e905a260a35faefcc527be7516aa11c0256729b5b351bc33"
+  },
+
+];
+
+const dummyOffers = [
+  {
+
+  }
+]
+
+class MarginTrade extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      lenderAddress: "0x4fe5d34162fa812e7d71bd5305954f4733e92712",
-      tokenPair: "OMG/ETH",
-      loanQuantity: 100,
-      loanToken: "OMG",
-      costAmount: 10,
-      costToken: "ETH"
+      orders: [],
+      offers: [],
+      matches: []
     }
-
-    this.handleQuantityChange = this.handleQuantityChange.bind(this);
-    this.handleMarketChange = this.handleMarketChange.bind(this);
-    this.handleSubmit = this.handleSubmit.bind(this);
   }
 
-  handleMarketChange = (event) => {
-    const state = this.state;
-    const market = MARKETS[event.target.value];
-    state['tokenPair'] = market.tokenPair;
-    this.setState(state);
-  }
+  fetchMatchingOrders = async () => {
 
-  handleQuantityChange = (event) => {
-    const state = this.state;
-    state['loanQuantity'] = event.target.value;
-    this.setState(state);
-  }
+    let orders = [],
+        offers = [],
+        matches = [];
 
-  handleLoanTokenChange = (event) => {
-    const state = this.state;
-    state['loanToken'] = event.target.value;
-    this.setState(state);
-  }
+    try {
+      const resOrders = await axios.get('http://localhost:8090/orders');
+      const resOffers = await axios.get('http://localhost:8080/offers');
+      orders = resOrders.data.orders || [];
+      offers = resOffers.data.offers || [];
 
-  handleCostAmountChange = (event) => {
-    const state = this.state;
-    state['costAmount'] = event.target.value;
-    this.setState(state);
-  }
-
-  handleCostTokenChange = (event) => {
-    const state = this.state;
-    state['costToken'] = event.target.value;
-    this.setState(state);
-  }
-
-  handleSubmit(event) {
-    event.preventDefault();
-    const { lenderAddress, tokenPair, loanQuantity, loanToken, costAmount, costToken } = this.state;
-    const payload = {
-      lenderAddress: lenderAddress,
-      tokenPair: tokenPair,
-      loanQuantity: loanQuantity,
-      loanToken: loanToken,
-      costAmount: costAmount,
-      costToken: costToken
-    };
-    const web3 = new Web3(window.web3.currentProvider);
-
-    web3.eth.getAccounts().then((accounts) => {
-      return web3.eth.personal.sign(JSON.stringify(payload), accounts[0])
-        .then((result) => {
-          payload['ecSignature'] = result;
-          return axios.post('http://localhost:8080/offers', payload).then((result) => {
-            console.log(result);
-          });
-        })
-    })
-      .catch((error) => {
-        console.log(error);
+      orders.forEach((order) => {
+        offers.forEach((offer) => {
+          if (order.makerTokenAddress === offer.loanTokenAddress && order.takerTokenAddress === offer.loanCostTokenAddress) {
+            matches.push({
+              order: order,
+              offer: offer
+            });
+          }
+        });
       });
+
+      this.setState({offers, orders, matches});
+    } catch (err) {
+      console.log(err);
+    };
+    
+  }
+
+  componentDidMount() {
+    
+  }
+
+  handleOpenPosition = (match) => {
+    console.log(match);
   }
 
   render() {
-    return (
-      <Form className="offer-form" onSubmit={this.handleSubmit}>
-        <FormGroup row>
-          <Label for="market" sm={2}>Market</Label>
-          <Col sm={10}>
-            <Input type="select" name="market" id="market" onChange={this.handleMarketChange}>
-              <option value="OMG_ETH">OMG/ETH</option>
-              <option value="ZRX_ETH">ZRX/ETH</option>
-            </Input>
-          </Col>
-        </FormGroup>
-        <FormGroup row>
-          <Label for="quantity" sm={2}>Quantity</Label>
-          <Col sm={10}>
-            <Input value={this.state.loanQuantity} type="number" name="quantity" id="quantity"
-              placeholder="1000" onChange={this.handleQuantityChange} />
-          </Col>
-        </FormGroup>
-        <FormGroup row>
-          <Label for="loanToken" sm={2}>Loan Token</Label>
-          <Col sm={10}>
-            <Input value={this.state.loanToken} type="text" name="loanToken" id="loan-token"
-              placeholder="OMG" onChange={this.handleLoanTokenChange} />
-          </Col>
-        </FormGroup>
-        <FormGroup row>
-          <Label for="Cost" sm={2}>Loan Cost</Label>
-          <Col sm={5}>
-            <Input value={this.state.costAmount} type="text" name="costAmount" id="costAmount"
-              placeholder="100" onChange={this.handleCostAmountChange} />
-          </Col>
-          <Col sm={5}>
-            <Input value={this.state.costToken} type="text" name="costToken" id="costToken"
-              placeholder="100" onChange={this.handleCostTokenChange} />
-          </Col>
+    const { matches } = this.state;
+    const matchesNodes = matches.map(function (match, index) {
+      return (
+        <tr key={index}>
+          <td>{match.offer.market}</td>
 
-        </FormGroup>
-        <FormGroup row>
-          <Col className="text-center">
-            <Button>Submit</Button>
-          </Col>
-        </FormGroup>
-      </Form>
+          <td>{getTokenNameFromAddress(match.order.makerTokenAddress)}</td>
+          <td>{match.order.makerTokenAmount}</td>
+          <td>{match.order.makerFee}</td>
+
+          <td>{getTokenNameFromAddress(match.order.takerTokenAddress)}</td>
+          <td>{match.order.takerTokenAmount}</td>
+          <td>{match.order.takerFee}</td>
+          
+          <td>
+            <Button
+              type="primary"
+              onClick={() => this.handleOpenPosition(match)}
+              size="large"
+            >
+             Open Position
+            </Button>
+          </td>
+        </tr>
+      );
+    });
+    return (
+      <Table
+        className="matching-orders-table"
+        striped
+        hover
+        responsive
+      >
+        <thead>
+          <tr>
+            <th>Market</th>
+            <th>Maker Token</th>
+            <th>Maker Amount</th>
+            <th>Maker Fee</th>
+            <th>Taker Token</th>
+            <th>Taker Amount</th>
+            <th>Taker Fee</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {matchesNodes}
+        </tbody>
+      </Table>
     );
   }
 }
 
-export default CreateOffer;
+export default MarginTrade;

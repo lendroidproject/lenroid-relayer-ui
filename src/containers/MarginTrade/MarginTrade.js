@@ -1,33 +1,37 @@
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import { Col, Table } from 'reactstrap';
-import { Button, Alert } from 'antd';
+import { Button, Alert, Spin } from 'antd';
 import { default as Web3 } from 'web3';
 import axios from 'axios';
 import { Lendroid } from 'lendroid';
 import { getTokenNameFromAddress } from '../../utils';
+import { SERVER_ORDERS, SERVER_OFFERS } from '../../config';
 
 import './MarginTrade.css';
 
-class MarginTrade extends Component {
+class MarginTrade extends PureComponent {
   constructor(props) {
     super(props);
     this.state = {
       orders: [],
       offers: [],
       matches: [],
-      isLoggedIn: false
+      isLoading: false
     }
   }
 
   fetchMatchingOrders = async () => {
-
     let orders = [],
         offers = [],
         matches = [];
 
+    this.setState({
+      isLoading: true
+    });
+
     try {
-      const resOrders = await axios.get('http://localhost:8090/orders');
-      const resOffers = await axios.get('http://localhost:8080/offers');
+      const resOrders = await axios.get(SERVER_ORDERS);
+      const resOffers = await axios.get(SERVER_OFFERS);
       orders = resOrders.data.orders || [];
       offers = resOffers.data.offers || [];
 
@@ -46,20 +50,23 @@ class MarginTrade extends Component {
     } catch (err) {
       console.log(err);
     };
-    
+
+    this.setState({
+      isLoading: false
+    });
   }
 
-  componentDidMount() {
-    
+  componentDidMount () {
+    this.fetchMatchingOrders();
   }
 
   handleOpenPosition = (match) => {
     const {lendroid} = this.props;
-    
   }
 
   render() {
     const { matches } = this.state;
+    console.log(matches);
     const matchesNodes = matches.map(function (match, index) {
       return (
         <tr key={index}>
@@ -86,8 +93,9 @@ class MarginTrade extends Component {
       );
     });
     return (
-      <div className="margin-trade">
-
+      <div
+        className="margin-trade"
+      >
         <Table
           className="matching-orders-table"
           striped
@@ -110,6 +118,17 @@ class MarginTrade extends Component {
             {matchesNodes}
           </tbody>
         </Table>
+        
+        <div 
+          style={{
+            textAlign: 'center'
+          }}
+        >
+          <Spin
+            size="large"
+            spinning={this.state.isLoading}
+          />
+        </div>
       </div>
     );
   }

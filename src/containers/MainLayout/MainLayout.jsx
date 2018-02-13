@@ -33,6 +33,10 @@ class MainLayout extends PureComponent {
   }
 
   componentDidMount () {
+    setInterval(this._checkAccountStatus, 200);
+  }
+
+  _checkAccountStatus = () => {
     const {lendroid} = this.props;
     const web3 = lendroid.Web3;
 
@@ -114,7 +118,7 @@ class MainLayout extends PureComponent {
               padding: 24,
               background: '#fff',
               minHeight: 280,
-              position: 'relative'
+              position: 'relative',
             }}
           >
             <Switch>
@@ -131,16 +135,17 @@ class MainLayout extends PureComponent {
               <Redirect to="/view-orders"/>
             </Switch>
             {
-              this.state.isLoggedIn &&
+              !this.state.isLoggedIn &&
                 <Alert
                   message="Warning"
-                  description="This is a warning notice about copywriting."
+                  description="You haven't connected to any provider. Please try to login through Metamask"
                   type="warning"
                   showIcon
                   style={{
                     position: 'absolute',
                     bottom: '0px',
-                    right: '0px',
+                    left: '50%',
+                    transform: 'translateX(-50%)'
                   }}
                 />
             }

@@ -4,6 +4,7 @@ import { Button, Dialog, Form, Input } from 'antd';
 import { default as Web3 } from 'web3';
 import axios from 'axios';
 import { getTokenNameFromAddress } from '../../utils';
+import { SERVER_ORDERS } from '../../config';
 import './ViewOrders.css';
 
 class ViewOrders extends PureComponent {
@@ -18,7 +19,7 @@ class ViewOrders extends PureComponent {
 
   componentDidMount() {
     const self = this;
-    axios.get('http://localhost:8090/orders')
+    axios.get(SERVER_ORDERS)
       .then((response) => {
         console.log(response.data);
         this.setState({
@@ -66,14 +67,14 @@ class ViewOrders extends PureComponent {
           <td>{order.makerTokenAmount}</td>
           <td>{getTokenNameFromAddress(order.takerTokenAddress)}</td>
           <td>{order.takerTokenAmount} {order.costToken}</td>
-          <td>
+          {/* <td>
             <Button
               onClick={() => this.handleTakeOrder(order)}
               size="large"
             >
               Take
             </Button>
-          </td>
+          </td> */}
         </tr>
       );
     });
@@ -100,7 +101,7 @@ class ViewOrders extends PureComponent {
               <th>Maker Amount</th>
               <th>Taker Token</th>
               <th>Taker Amount</th>
-              <th></th>
+              {/* <th></th> */}
             </tr>
           </thead>
           <tbody>

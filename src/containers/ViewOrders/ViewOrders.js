@@ -1,16 +1,18 @@
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import { Col, Table } from 'reactstrap';
-import { Button } from 'antd';
+import { Button, Dialog, Form, Input } from 'antd';
 import { default as Web3 } from 'web3';
 import axios from 'axios';
 import { getTokenNameFromAddress } from '../../utils';
 import './ViewOrders.css';
 
-class ViewOrders extends Component {
+class ViewOrders extends PureComponent {
   constructor(props) {
     super(props);
     this.state = {
-      orders: []
+      orders: [],
+      visible: false,
+      confirmLoading: false
     }
   }
 
@@ -33,11 +35,30 @@ class ViewOrders extends Component {
   }
 
   handleCreateOrder = () => {
+    this.setState({
+      visible: true
+    });
+  }
 
+  _renderCreateOrder = () => {
+    const { visible, confirmLoading} = this.state;
+    const { getFieldDecorator } = this.props;
+    // return (
+    //   <Dialog>
+    //     <Form>
+    //       <Form.Item>
+    //         {
+    //           getFieldDecorator("")
+    //         }
+    //       </Form.Item>
+    //     </Form>
+    //   </Dialog>
+    // );
   }
 
   render() {
     const { orders } = this.state;
+    
     const orderNodes = orders.map(function (order, index) {
       return (
         <tr key={index}>
@@ -56,6 +77,7 @@ class ViewOrders extends Component {
         </tr>
       );
     });
+
     return (
       <div className="view-orders">
         <Button 
@@ -90,4 +112,6 @@ class ViewOrders extends Component {
   }
 }
 
-export default ViewOrders;
+const wrappedViewOrders = Form.create()(ViewOrders);
+
+export default wrappedViewOrders;

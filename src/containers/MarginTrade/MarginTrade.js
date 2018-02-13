@@ -42,6 +42,7 @@ class OpenPositionModal extends PureComponent {
 
   componentWillReceiveProps (newProps) {
     const { visible } = newProps;
+    const { resetFields } = newProps.form;
     this.setState ({
       visible
     });
@@ -57,6 +58,17 @@ class OpenPositionModal extends PureComponent {
     const { getFieldDecorator } = this.props.form;
     const tokenSymbols = ['OMG', 'ETH', 'ZRX'];
 
+    const formItemLayout = {
+      labelCol: {
+        xs: { span: 24 },
+        sm: { span: 8 },
+      },
+      wrapperCol: {
+        xs: { span: 24 },
+        sm: { span: 16 },
+      },
+    };
+
     return (
       <Modal
         title="Open Trade Position"
@@ -67,14 +79,14 @@ class OpenPositionModal extends PureComponent {
       >
         <Form>
           <Form.Item
+            {...formItemLayout}
             label="Taker Token"
-            colon={false}
           >
             {
               getFieldDecorator('takerToken', {
                 rules: [
                   { required: true, message: 'Please select a taker token' }
-                ]
+                ],
               })(
                 <Select
                   placeholder="Select a loan token"
@@ -96,8 +108,8 @@ class OpenPositionModal extends PureComponent {
           </Form.Item>
 
           <Form.Item
+            {...formItemLayout}
             label="Amount"
-            colon={false}
           >
             {getFieldDecorator('fillTakerTokenAmount', {
               rules: [{ required: true, message: 'Please input token amount of taker' }],
@@ -113,8 +125,8 @@ class OpenPositionModal extends PureComponent {
           </Form.Item>
 
           <Form.Item
+            {...formItemLayout}
             label="Wrangler Address"
-            colon={false}
           >
             {getFieldDecorator('wranglerAddress', {
               rules: [],

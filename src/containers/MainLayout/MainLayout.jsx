@@ -5,7 +5,7 @@ import ViewOrders from '../ViewOrders/ViewOrders';
 import MarginTrade from '../MarginTrade/MarginTrade';
 import './MainLayout.css';
 
-const { Header, Content, Footer, Sider } = Layout;
+const { Header, Content, Sider } = Layout;
 
 const UserMenu = (props) => (
   <Menu {...props}>
@@ -41,7 +41,7 @@ class MainLayout extends PureComponent {
     const web3 = lendroid.Web3;
 
     web3.eth.getAccounts((err, accounts) => {
-      if (!accounts || accounts.length == 0) {
+      if (!accounts || accounts.length === 0) {
         this.setState({
           isLoggedIn: false
         });

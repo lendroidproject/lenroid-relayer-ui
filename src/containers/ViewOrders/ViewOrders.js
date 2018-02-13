@@ -1,7 +1,6 @@
 import React, { PureComponent } from 'react';
-import { Col, Table } from 'reactstrap';
-import { Button, Dialog, Form, Input } from 'antd';
-import { default as Web3 } from 'web3';
+import { Table } from 'reactstrap';
+import { Button } from 'antd';
 import axios from 'axios';
 import { getTokenNameFromAddress } from '../../utils';
 import { SERVER_ORDERS } from '../../config';
@@ -18,10 +17,8 @@ class ViewOrders extends PureComponent {
   }
 
   componentDidMount() {
-    const self = this;
     axios.get(SERVER_ORDERS)
       .then((response) => {
-        console.log(response.data);
         this.setState({
           orders: response.data.orders
         });
@@ -39,22 +36,6 @@ class ViewOrders extends PureComponent {
     this.setState({
       visible: true
     });
-  }
-
-  _renderCreateOrder = () => {
-    const { visible, confirmLoading} = this.state;
-    const { getFieldDecorator } = this.props;
-    // return (
-    //   <Dialog>
-    //     <Form>
-    //       <Form.Item>
-    //         {
-    //           getFieldDecorator("")
-    //         }
-    //       </Form.Item>
-    //     </Form>
-    //   </Dialog>
-    // );
   }
 
   render() {
@@ -113,6 +94,4 @@ class ViewOrders extends PureComponent {
   }
 }
 
-const wrappedViewOrders = Form.create()(ViewOrders);
-
-export default wrappedViewOrders;
+export default ViewOrders;

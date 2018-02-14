@@ -1,2 +1,2 @@
-export const SERVER_OFFERS = 'https://portaldemo-195022.appspot.com/offers';
-export const SERVER_ORDERS = 'https://relayerdemo.appspot.com/orders';
+export const SERVER_OFFERS = 'http://localhost:8080/offers';
+export const SERVER_ORDERS = 'http://localhost:8090/orders';

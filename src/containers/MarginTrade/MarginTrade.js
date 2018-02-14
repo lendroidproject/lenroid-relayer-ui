@@ -58,8 +58,7 @@ class OpenPositionModal extends PureComponent {
         visible={this.state.visible}
         onOk={this.handleOk}
         confirmLoading={this.state.confirmLoading}
-        onCancel={this.handleCancel}
-      >
+        onCancel={this.handleCancel}>
         {
           (match && match.order && match.offer) && (
             <div>
@@ -79,71 +78,6 @@ class OpenPositionModal extends PureComponent {
             </div>
           )
         }
-        
-
-        {/* <Form>
-          <Form.Item
-            {...formItemLayout}
-            label="Taker Token"
-          >
-            {
-              getFieldDecorator('takerToken', {
-                rules: [
-                  { required: true, message: 'Please select a taker token' }
-                ],
-              })(
-                <Select
-                  placeholder="Select a loan token"
-                  size="large"
-                >
-                  {
-                    tokenSymbols.map((token) => (
-                      <Select.Option
-                        key={token}
-                        value={token}
-                      >
-                        {token}
-                      </Select.Option>
-                    ))
-                  }
-                </Select>
-              )
-            }
-          </Form.Item>
-
-          <Form.Item
-            {...formItemLayout}
-            label="Amount"
-          >
-            {getFieldDecorator('fillTakerTokenAmount', {
-              rules: [{ required: true, message: 'Please input token amount of taker' }],
-            })(
-              <InputNumber
-                size="large"
-                min={1}
-                style={{
-                  width: '100%'
-                }}
-              />
-            )}
-          </Form.Item>
-
-          <Form.Item
-            {...formItemLayout}
-            label="Wrangler Address"
-          >
-            {getFieldDecorator('wranglerAddress', {
-              rules: [],
-            })(
-              <Input
-                size="large"
-                style={{
-                  width: '100%'
-                }}
-              />
-            )}
-          </Form.Item>
-        </Form> */}
       </Modal>
     )
   }

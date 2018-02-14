@@ -1,11 +1,11 @@
 import React, { PureComponent } from 'react';
 import { NavLink, Route, Switch, Redirect } from 'react-router-dom';
-import { Layout, Menu, Icon, Dropdown, Avatar } from 'antd';
+import { Layout, Menu, Icon, Dropdown, Avatar, Alert } from 'antd';
 import ViewOrders from '../ViewOrders/ViewOrders';
 import MarginTrade from '../MarginTrade/MarginTrade';
 import './MainLayout.css';
 
-const { Header, Content, Footer, Sider } = Layout;
+const { Header, Content, Sider } = Layout;
 
 const UserMenu = (props) => (
   <Menu {...props}>
@@ -27,8 +27,30 @@ class MainLayout extends PureComponent {
     super(props);
 
     this.state = {
-      collapsed: false
+      collapsed: false,
+      isLoggedIn: false
     }
+  }
+
+  componentDidMount () {
+    setInterval(this._checkAccountStatus, 200);
+  }
+
+  _checkAccountStatus = () => {
+    const {lendroid} = this.props;
+    const web3 = lendroid.Web3;
+
+    web3.eth.getAccounts((err, accounts) => {
+      if (!accounts || accounts.length === 0) {
+        this.setState({
+          isLoggedIn: false
+        });
+      } else {
+        this.setState({
+          isLoggedIn: true
+        });
+      }
+    });
   }
 
   render() {
@@ -95,14 +117,38 @@ class MainLayout extends PureComponent {
               margin: '24px 16px',
               padding: 24,
               background: '#fff',
-              minHeight: 280
+              minHeight: 280,
+              position: 'relative',
             }}
           >
             <Switch>
-              <Route exact path="/view-orders" component={ViewOrders}/>
-              <Route exact path="/margin-trade" component={MarginTrade}/>
+              <Route
+                exact
+                path="/view-orders"
+                render={ (routeProps)=> <ViewOrders {...routeProps} {...this.props} isLoggedIn={this.state.isLoggedIn}/> }
+              />
+              <Route
+                exact
+                path="/margin-trade"
+                render={ (routeProps)=> <MarginTrade {...routeProps} {...this.props} isLoggedIn={this.state.isLoggedIn}/> }
+              />
               <Redirect to="/view-orders"/>
             </Switch>
+            {
+              !this.state.isLoggedIn &&
+                <Alert
+                  message="Warning"
+                  description="You haven't connected to any provider. Please try to login through Metamask"
+                  type="warning"
+                  showIcon
+                  style={{
+                    position: 'absolute',
+                    bottom: '0px',
+                    left: '50%',
+                    transform: 'translateX(-50%)'
+                  }}
+                />
+            }
           </Content>
         </Layout>
       </Layout>

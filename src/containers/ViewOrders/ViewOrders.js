@@ -1,24 +1,24 @@
-import React, { Component } from 'react';
-import { Col, Table } from 'reactstrap';
+import React, { PureComponent } from 'react';
+import { Table } from 'reactstrap';
 import { Button } from 'antd';
-import { default as Web3 } from 'web3';
 import axios from 'axios';
 import { getTokenNameFromAddress } from '../../utils';
+import { SERVER_ORDERS } from '../../config';
 import './ViewOrders.css';
 
-class ViewOrders extends Component {
+class ViewOrders extends PureComponent {
   constructor(props) {
     super(props);
     this.state = {
-      orders: []
+      orders: [],
+      visible: false,
+      confirmLoading: false
     }
   }
 
   componentDidMount() {
-    const self = this;
-    axios.get('http://localhost:8090/orders')
+    axios.get(SERVER_ORDERS)
       .then((response) => {
-        console.log(response.data);
         this.setState({
           orders: response.data.orders
         });
@@ -32,8 +32,15 @@ class ViewOrders extends Component {
     console.log(order);
   }
 
+  handleCreateOrder = () => {
+    this.setState({
+      visible: true
+    });
+  }
+
   render() {
     const { orders } = this.state;
+    
     const orderNodes = orders.map(function (order, index) {
       return (
         <tr key={index}>
@@ -41,38 +48,48 @@ class ViewOrders extends Component {
           <td>{order.makerTokenAmount}</td>
           <td>{getTokenNameFromAddress(order.takerTokenAddress)}</td>
           <td>{order.takerTokenAmount} {order.costToken}</td>
-          <td>
+          {/* <td>
             <Button
-              type="primary"
               onClick={() => this.handleTakeOrder(order)}
               size="large"
             >
               Take
             </Button>
-          </td>
+          </td> */}
         </tr>
       );
     });
+
     return (
-      <Table
-        className="orders-table"
-        striped
-        hover
-        responsive
-      >
-        <thead>
-          <tr>
-            <th>Maker Token</th>
-            <th>Maker Amount</th>
-            <th>Taker Token</th>
-            <th>Taker Amount</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          {orderNodes}
-        </tbody>
-      </Table>
+      <div className="view-orders">
+        <Button 
+          type="primary"
+          size="large"
+          onClick={this.handleCreateOrder}
+          className="btn-create-order"
+        >
+          Create Order
+        </Button>
+        <Table
+          className="orders-table"
+          striped
+          hover
+          responsive
+        >
+          <thead>
+            <tr>
+              <th>Maker Token</th>
+              <th>Maker Amount</th>
+              <th>Taker Token</th>
+              <th>Taker Amount</th>
+              {/* <th></th> */}
+            </tr>
+          </thead>
+          <tbody>
+            {orderNodes}
+          </tbody>
+        </Table>
+      </div>
     );
   }
 }

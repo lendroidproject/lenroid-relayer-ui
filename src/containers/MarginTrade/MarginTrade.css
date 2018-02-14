@@ -1,0 +1,7 @@
+.margin-trade .matching-orders-table {
+  border: 1px solid #ddd;
+}
+
+.margin-trade .matching-orders-table td {
+  vertical-align: middle;
+}

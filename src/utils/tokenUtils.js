@@ -6,7 +6,7 @@ export const TokenMap = {
 
 export const getTokenNameFromAddress = (tokenAddress) => {
   for (let tokenName in TokenMap) {
-    if (TokenMap[tokenName] == tokenAddress)
+    if (TokenMap[tokenName] === tokenAddress)
       return tokenName;
   }
 

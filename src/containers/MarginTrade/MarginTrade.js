@@ -1,133 +1,296 @@
-import React, { Component } from 'react';
-import { Col, Button, Form, FormGroup, Label, Input, FormText, Row } from 'reactstrap';
-import { default as Web3 } from 'web3';
+import React, { PureComponent } from 'react';
+import { Table } from 'reactstrap';
+import { Button, Spin, Modal, Form, Input, InputNumber, Select } from 'antd';
 import axios from 'axios';
+import { getTokenNameFromAddress } from '../../utils';
+import { SERVER_ORDERS, SERVER_OFFERS } from '../../config';
 
-const MARKETS = {
-  'OMG_ETH': { pair: 'OMG/ETH', loanToken: 'OMG' },
-  'ZRX_ETH': { pair: 'ZRX/ETH', loanToken: 'ZRX' },
-}
-class CreateOffer extends Component {
+import './MarginTrade.css';
+
+class OpenPositionModal extends PureComponent {
+  state = {
+    visible: false,
+    confirmLoading: false
+  };
+
+  handleOk = () => {
+    const { lendroid, match, onClose } = this.props;
+    const { validateFields } = this.props.form;
+
+    validateFields((err, values) => {
+      if (!err) {
+        const { fillTakerTokenAmount, takerToken, wranglerAddress } = values;
+
+        this.setState({ confirmLoading: true });
+
+        lendroid.openMarginTradingPosition(
+          match.offer,
+          match.order,
+          fillTakerTokenAmount,
+          takerToken,
+          wranglerAddress,
+        ).then(() => {
+          onClose();
+        }).catch((error) => {
+          console.log(error);
+        }).finally(() => {
+          this.setState({ confirmLoading: false });
+        });
+      }
+    });
+  }
+
+  componentWillReceiveProps (newProps) {
+    const { visible } = newProps;
+    const { resetFields } = newProps.form;
+    this.setState ({
+      visible
+    });
+  }
+
+  handleCancel = () => {
+    const { onClose } = this.props;
+    onClose();
+  }
+
+  render () {
+    
+    const { getFieldDecorator } = this.props.form;
+    const tokenSymbols = ['OMG', 'ETH', 'ZRX'];
+
+    const formItemLayout = {
+      labelCol: {
+        xs: { span: 24 },
+        sm: { span: 8 },
+      },
+      wrapperCol: {
+        xs: { span: 24 },
+        sm: { span: 16 },
+      },
+    };
+
+    return (
+      <Modal
+        title="Open Trade Position"
+        visible={this.state.visible}
+        onOk={this.handleOk}
+        confirmLoading={this.state.confirmLoading}
+        onCancel={this.handleCancel}
+      >
+        <Form>
+          <Form.Item
+            {...formItemLayout}
+            label="Taker Token"
+          >
+            {
+              getFieldDecorator('takerToken', {
+                rules: [
+                  { required: true, message: 'Please select a taker token' }
+                ],
+              })(
+                <Select
+                  placeholder="Select a loan token"
+                  size="large"
+                >
+                  {
+                    tokenSymbols.map((token) => (
+                      <Select.Option
+                        key={token}
+                        value={token}
+                      >
+                        {token}
+                      </Select.Option>
+                    ))
+                  }
+                </Select>
+              )
+            }
+          </Form.Item>
+
+          <Form.Item
+            {...formItemLayout}
+            label="Amount"
+          >
+            {getFieldDecorator('fillTakerTokenAmount', {
+              rules: [{ required: true, message: 'Please input token amount of taker' }],
+            })(
+              <InputNumber
+                size="large"
+                min={1}
+                style={{
+                  width: '100%'
+                }}
+              />
+            )}
+          </Form.Item>
+
+          <Form.Item
+            {...formItemLayout}
+            label="Wrangler Address"
+          >
+            {getFieldDecorator('wranglerAddress', {
+              rules: [],
+            })(
+              <Input
+                size="large"
+                style={{
+                  width: '100%'
+                }}
+              />
+            )}
+          </Form.Item>
+        </Form>
+      </Modal>
+    )
+  }
+};
+
+const WrappedModal = Form.create()(OpenPositionModal);
+
+class MarginTrade extends PureComponent {
   constructor(props) {
     super(props);
     this.state = {
-      lenderAddress: "0x4fe5d34162fa812e7d71bd5305954f4733e92712",
-      tokenPair: "OMG/ETH",
-      loanQuantity: 100,
-      loanToken: "OMG",
-      costAmount: 10,
-      costToken: "ETH"
+      orders: [],
+      offers: [],
+      matches: [],
+      isLoading: false,
+
+      currentMatch: undefined,
+      isModalOpened: false,
     }
-
-    this.handleQuantityChange = this.handleQuantityChange.bind(this);
-    this.handleMarketChange = this.handleMarketChange.bind(this);
-    this.handleSubmit = this.handleSubmit.bind(this);
   }
 
-  handleMarketChange = (event) => {
-    const state = this.state;
-    const market = MARKETS[event.target.value];
-    state['tokenPair'] = market.tokenPair;
-    this.setState(state);
-  }
+  fetchMatchingOrders = async () => {
+    let orders = [],
+      offers = [],
+      matches = [];
 
-  handleQuantityChange = (event) => {
-    const state = this.state;
-    state['loanQuantity'] = event.target.value;
-    this.setState(state);
-  }
+    this.setState({
+      isLoading: true
+    });
 
-  handleLoanTokenChange = (event) => {
-    const state = this.state;
-    state['loanToken'] = event.target.value;
-    this.setState(state);
-  }
+    try {
+      const resOrders = await axios.get(SERVER_ORDERS);
+      const resOffers = await axios.get(SERVER_OFFERS);
+      orders = resOrders.data.orders || [];
+      offers = resOffers.data.offers || [];
 
-  handleCostAmountChange = (event) => {
-    const state = this.state;
-    state['costAmount'] = event.target.value;
-    this.setState(state);
-  }
-
-  handleCostTokenChange = (event) => {
-    const state = this.state;
-    state['costToken'] = event.target.value;
-    this.setState(state);
-  }
-
-  handleSubmit(event) {
-    event.preventDefault();
-    const { lenderAddress, tokenPair, loanQuantity, loanToken, costAmount, costToken } = this.state;
-    const payload = {
-      lenderAddress: lenderAddress,
-      tokenPair: tokenPair,
-      loanQuantity: loanQuantity,
-      loanToken: loanToken,
-      costAmount: costAmount,
-      costToken: costToken
-    };
-    const web3 = new Web3(window.web3.currentProvider);
-
-    web3.eth.getAccounts().then((accounts) => {
-      return web3.eth.personal.sign(JSON.stringify(payload), accounts[0])
-        .then((result) => {
-          payload['ecSignature'] = result;
-          return axios.post('http://localhost:8080/offers', payload).then((result) => {
-            console.log(result);
-          });
-        })
-    })
-      .catch((error) => {
-        console.log(error);
+      orders.forEach((order) => {
+        offers.forEach((offer) => {
+          if (order.makerTokenAddress === offer.loanTokenAddress && order.takerTokenAddress === offer.loanCostTokenAddress) {
+            matches.push({
+              order: order,
+              offer: offer
+            });
+          }
+        });
       });
+
+      this.setState({ offers, orders, matches });
+    } catch (err) {
+      console.log(err);
+    };
+
+    this.setState({
+      isLoading: false
+    });
+  }
+
+  componentDidMount() {
+    this.fetchMatchingOrders();
+  }
+
+  handleModalOpen = (match) => {
+    this.setState({
+      currentMatch: match,
+      isModalOpened: true
+    });
+  }
+
+  handleModalClose = () => {
+    this.setState({
+      currentMatch: undefined,
+      isModalOpened: false
+    })
   }
 
   render() {
-    return (
-      <Form className="offer-form" onSubmit={this.handleSubmit}>
-        <FormGroup row>
-          <Label for="market" sm={2}>Market</Label>
-          <Col sm={10}>
-            <Input type="select" name="market" id="market" onChange={this.handleMarketChange}>
-              <option value="OMG_ETH">OMG/ETH</option>
-              <option value="ZRX_ETH">ZRX/ETH</option>
-            </Input>
-          </Col>
-        </FormGroup>
-        <FormGroup row>
-          <Label for="quantity" sm={2}>Quantity</Label>
-          <Col sm={10}>
-            <Input value={this.state.loanQuantity} type="number" name="quantity" id="quantity"
-              placeholder="1000" onChange={this.handleQuantityChange} />
-          </Col>
-        </FormGroup>
-        <FormGroup row>
-          <Label for="loanToken" sm={2}>Loan Token</Label>
-          <Col sm={10}>
-            <Input value={this.state.loanToken} type="text" name="loanToken" id="loan-token"
-              placeholder="OMG" onChange={this.handleLoanTokenChange} />
-          </Col>
-        </FormGroup>
-        <FormGroup row>
-          <Label for="Cost" sm={2}>Loan Cost</Label>
-          <Col sm={5}>
-            <Input value={this.state.costAmount} type="text" name="costAmount" id="costAmount"
-              placeholder="100" onChange={this.handleCostAmountChange} />
-          </Col>
-          <Col sm={5}>
-            <Input value={this.state.costToken} type="text" name="costToken" id="costToken"
-              placeholder="100" onChange={this.handleCostTokenChange} />
-          </Col>
+    const { matches } = this.state;
 
-        </FormGroup>
-        <FormGroup row>
-          <Col className="text-center">
-            <Button>Submit</Button>
-          </Col>
-        </FormGroup>
-      </Form>
+    const matchesNodes = matches.map((match, index) => {
+      return (
+        <tr key={index}>
+          <td>{match.offer.market}</td>
+
+          <td>{getTokenNameFromAddress(match.order.makerTokenAddress)}</td>
+          <td>{match.order.makerTokenAmount}</td>
+          <td>{match.order.makerFee}</td>
+
+          <td>{getTokenNameFromAddress(match.order.takerTokenAddress)}</td>
+          <td>{match.order.takerTokenAmount}</td>
+          <td>{match.order.takerFee}</td>
+
+          <td>
+            <Button
+              type="primary"
+              onClick={() => this.handleModalOpen(match)}
+              size="large"
+            >
+              Open Position
+            </Button>
+          </td>
+        </tr>
+      );
+    });
+
+    return (
+      <div
+        className="margin-trade"
+      >
+        <Table
+          className="matching-orders-table"
+          striped
+          hover
+          responsive
+        >
+          <thead>
+            <tr>
+              <th>Market</th>
+              <th>Maker Token</th>
+              <th>Maker Amount</th>
+              <th>Maker Fee</th>
+              <th>Taker Token</th>
+              <th>Taker Amount</th>
+              <th>Taker Fee</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {matchesNodes}
+          </tbody>
+        </Table>
+
+        <div
+          style={{
+            textAlign: 'center'
+          }}
+        >
+          <Spin
+            size="large"
+            spinning={this.state.isLoading}
+          />
+        </div>
+
+        <WrappedModal
+          lendroid={this.props.lendroid}
+          match={this.state.currentMatch}
+          visible={this.state.isModalOpened}
+          onClose={this.handleModalClose}
+        />
+      </div>
     );
   }
 }
 
-export default CreateOffer;
+export default MarginTrade;

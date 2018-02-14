@@ -15,28 +15,24 @@ class OpenPositionModal extends PureComponent {
 
   handleOk = () => {
     const { lendroid, match, onClose } = this.props;
-    const { validateFields } = this.props.form;
+    const fillTakerTokenAmount = match.order.takerTokenAmount;
+    const takerToken = getTokenNameFromAddress(match.order.takerTokenAddress);
+    const wranglerAddress = match.offer.wranglerAddress;
 
-    validateFields((err, values) => {
-      if (!err) {
-        const { fillTakerTokenAmount, takerToken, wranglerAddress } = values;
+    this.setState({ confirmLoading: true });
 
-        this.setState({ confirmLoading: true });
-
-        lendroid.openMarginTradingPosition(
-          match.offer,
-          match.order,
-          fillTakerTokenAmount,
-          takerToken,
-          wranglerAddress,
-        ).then(() => {
-          onClose();
-        }).catch((error) => {
-          console.log(error);
-        }).finally(() => {
-          this.setState({ confirmLoading: false });
-        });
-      }
+    lendroid.openMarginTradingPosition(
+      match.offer,
+      match.order,
+      fillTakerTokenAmount,
+      takerToken,
+      wranglerAddress
+    ).then(() => {
+      onClose();
+    }).catch((error) => {
+      console.log(error);
+    }).finally(() => {
+      this.setState({ confirmLoading: false });
     });
   }
 
@@ -54,20 +50,7 @@ class OpenPositionModal extends PureComponent {
   }
 
   render () {
-    
-    const { getFieldDecorator } = this.props.form;
-    const tokenSymbols = ['OMG', 'ETH', 'ZRX'];
-
-    const formItemLayout = {
-      labelCol: {
-        xs: { span: 24 },
-        sm: { span: 8 },
-      },
-      wrapperCol: {
-        xs: { span: 24 },
-        sm: { span: 16 },
-      },
-    };
+    const { match } = this.props;
 
     return (
       <Modal
@@ -77,7 +60,28 @@ class OpenPositionModal extends PureComponent {
         confirmLoading={this.state.confirmLoading}
         onCancel={this.handleCancel}
       >
-        <Form>
+        {
+          (match && match.order && match.offer) && (
+            <div>
+              <h4>{match.offer.market} Market</h4>
+              <h6>Maker Token: {getTokenNameFromAddress(match.order.makerTokenAddress)}</h6>
+              <h6>Maker Token Amount: {match.order.makerTokenAmount}</h6><br/>
+              <h6>Taker Token: {getTokenNameFromAddress(match.order.takerTokenAddress)}</h6>
+              <h6>Taker Token Amount: {match.order.takerTokenAmount}</h6><br/>
+    
+              <h6>Loan Cost Token: {getTokenNameFromAddress(match.offer.loanCostTokenAddress)}</h6>
+              <h6>Loan Cost Token Amount: {match.offer.loanCostTokenAmount}</h6><br/>
+    
+              <h6>Loan Interest Token: {getTokenNameFromAddress(match.offer.loanInterestTokenAddress)}</h6>
+              <h6>Loan Interest Token Amount: {match.offer.loanInterestTokenAmount}</h6><br/>
+
+              <h6>Wrangler Address: {match.offer.wranglerAddress || 'Not Defined!'} </h6>
+            </div>
+          )
+        }
+        
+
+        {/* <Form>
           <Form.Item
             {...formItemLayout}
             label="Taker Token"
@@ -139,7 +143,7 @@ class OpenPositionModal extends PureComponent {
               />
             )}
           </Form.Item>
-        </Form>
+        </Form> */}
       </Modal>
     )
   }
@@ -210,7 +214,6 @@ class MarginTrade extends PureComponent {
 
   handleModalClose = () => {
     this.setState({
-      currentMatch: undefined,
       isModalOpened: false
     })
   }

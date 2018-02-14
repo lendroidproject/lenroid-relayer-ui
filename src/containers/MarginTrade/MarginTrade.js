@@ -15,28 +15,24 @@ class OpenPositionModal extends PureComponent {
 
   handleOk = () => {
     const { lendroid, match, onClose } = this.props;
-    const { validateFields } = this.props.form;
+    const fillTakerTokenAmount = match.order.takerTokenAmount;
+    const takerToken = getTokenNameFromAddress(match.order.takerTokenAddress);
+    const wranglerAddress = match.offer.wranglerAddress;
 
-    validateFields((err, values) => {
-      if (!err) {
-        const { fillTakerTokenAmount, takerToken, wranglerAddress } = values;
+    this.setState({ confirmLoading: true });
 
-        this.setState({ confirmLoading: true });
-
-        lendroid.openMarginTradingPosition(
-          match.offer,
-          match.order,
-          fillTakerTokenAmount,
-          takerToken,
-          wranglerAddress,
-        ).then(() => {
-          onClose();
-        }).catch((error) => {
-          console.log(error);
-        }).finally(() => {
-          this.setState({ confirmLoading: false });
-        });
-      }
+    lendroid.openMarginTradingPosition(
+      match.offer,
+      match.order,
+      fillTakerTokenAmount,
+      takerToken,
+      wranglerAddress
+    ).then(() => {
+      onClose();
+    }).catch((error) => {
+      console.log(error);
+    }).finally(() => {
+      this.setState({ confirmLoading: false });
     });
   }
 
@@ -54,20 +50,7 @@ class OpenPositionModal extends PureComponent {
   }
 
   render () {
-    
-    const { getFieldDecorator } = this.props.form;
-    const tokenSymbols = ['OMG', 'ETH', 'ZRX'];
-
-    const formItemLayout = {
-      labelCol: {
-        xs: { span: 24 },
-        sm: { span: 8 },
-      },
-      wrapperCol: {
-        xs: { span: 24 },
-        sm: { span: 16 },
-      },
-    };
+    const { match } = this.props;
 
     return (
       <Modal
@@ -75,71 +58,26 @@ class OpenPositionModal extends PureComponent {
         visible={this.state.visible}
         onOk={this.handleOk}
         confirmLoading={this.state.confirmLoading}
-        onCancel={this.handleCancel}
-      >
-        <Form>
-          <Form.Item
-            {...formItemLayout}
-            label="Taker Token"
-          >
-            {
-              getFieldDecorator('takerToken', {
-                rules: [
-                  { required: true, message: 'Please select a taker token' }
-                ],
-              })(
-                <Select
-                  placeholder="Select a loan token"
-                  size="large"
-                >
-                  {
-                    tokenSymbols.map((token) => (
-                      <Select.Option
-                        key={token}
-                        value={token}
-                      >
-                        {token}
-                      </Select.Option>
-                    ))
-                  }
-                </Select>
-              )
-            }
-          </Form.Item>
+        onCancel={this.handleCancel}>
+        {
+          (match && match.order && match.offer) && (
+            <div>
+              <h4>{match.offer.market} Market</h4>
+              <h6>Maker Token: {getTokenNameFromAddress(match.order.makerTokenAddress)}</h6>
+              <h6>Maker Token Amount: {match.order.makerTokenAmount}</h6><br/>
+              <h6>Taker Token: {getTokenNameFromAddress(match.order.takerTokenAddress)}</h6>
+              <h6>Taker Token Amount: {match.order.takerTokenAmount}</h6><br/>
+    
+              <h6>Loan Cost Token: {getTokenNameFromAddress(match.offer.loanCostTokenAddress)}</h6>
+              <h6>Loan Cost Token Amount: {match.offer.loanCostTokenAmount}</h6><br/>
+    
+              <h6>Loan Interest Token: {getTokenNameFromAddress(match.offer.loanInterestTokenAddress)}</h6>
+              <h6>Loan Interest Token Amount: {match.offer.loanInterestTokenAmount}</h6><br/>
 
-          <Form.Item
-            {...formItemLayout}
-            label="Amount"
-          >
-            {getFieldDecorator('fillTakerTokenAmount', {
-              rules: [{ required: true, message: 'Please input token amount of taker' }],
-            })(
-              <InputNumber
-                size="large"
-                min={1}
-                style={{
-                  width: '100%'
-                }}
-              />
-            )}
-          </Form.Item>
-
-          <Form.Item
-            {...formItemLayout}
-            label="Wrangler Address"
-          >
-            {getFieldDecorator('wranglerAddress', {
-              rules: [],
-            })(
-              <Input
-                size="large"
-                style={{
-                  width: '100%'
-                }}
-              />
-            )}
-          </Form.Item>
-        </Form>
+              <h6>Wrangler Address: {match.offer.wranglerAddress || 'Not Defined!'} </h6>
+            </div>
+          )
+        }
       </Modal>
     )
   }
@@ -210,7 +148,6 @@ class MarginTrade extends PureComponent {
 
   handleModalClose = () => {
     this.setState({
-      currentMatch: undefined,
       isModalOpened: false
     })
   }

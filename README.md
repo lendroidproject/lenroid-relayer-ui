@@ -17,20 +17,6 @@ below for guides and help on how to use reactstrap.
 * [Reactstrap Layout Guide](https://reactstrap.github.io/components/layout/)
 * [Reactstrap Component Guide](https://reactstrap.github.io/components/alerts/)
 
-### Routing
-Adding a Router
-Create React App doesn't prescribe a specific routing solution, but React Router is the most popular one.
-
-To add it, run:
-`npm install --save react-router-dom`
-
-Alternatively you may use yarn:
-`yarn add react-router-dom`
-
-To try it, delete all the code in src/App.js and replace it with any of the examples on its website. The Basic Example is a good place to get started.
-
-Note that you may need to configure your production server to support client-side routing before deploying your app.
-
 ## Building Project
 #### `npm test` or `yarn test`
 

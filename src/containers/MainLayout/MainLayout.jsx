@@ -2,6 +2,7 @@ import React, { PureComponent } from 'react';
 import { NavLink, Route, Switch, Redirect } from 'react-router-dom';
 import { Layout, Menu, Icon, Dropdown, Avatar, Alert } from 'antd';
 import ViewOrders from '../ViewOrders/ViewOrders';
+import CreateOrder from '../CreateOrder/CreateOrder';
 import MarginTrade from '../MarginTrade/MarginTrade';
 import './MainLayout.css';
 
@@ -76,7 +77,7 @@ class MainLayout extends PureComponent {
                     0x0980248324...1321
                   </span>
                 </div>
-                <Icon 
+                <Icon
                   type="down"
                   className="menu-icon"
                 />
@@ -96,6 +97,13 @@ class MainLayout extends PureComponent {
               theme="dark"
               mode="inline"
             >
+              <Menu.Item key="0">
+                <NavLink to="/create-order" activeClassName="active">
+                  <Icon type="bars" />
+                  <span>Create Order</span>
+                </NavLink>
+              </Menu.Item>
+
               <Menu.Item key="1">
                 <NavLink to="/view-orders" activeClassName="active">
                   <Icon type="bars" />
@@ -121,7 +129,12 @@ class MainLayout extends PureComponent {
               position: 'relative',
             }}
           >
-            <Switch>
+          <Switch>
+              <Route
+                exact
+                path="/create-order"
+                render={ (routeProps)=> <CreateOrder {...routeProps} {...this.props} isLoggedIn={this.state.isLoggedIn}/> }
+              />
               <Route
                 exact
                 path="/view-orders"
